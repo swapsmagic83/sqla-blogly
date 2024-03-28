@@ -4,16 +4,31 @@ from flask import Flask, render_template,redirect, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import text
 from models import db, connect_db,User
+import os
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY']='abcd'
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS']=False
+
+app.config["TESTING"] = 'False'
+if "TESTING" in os.environ.keys():
+    print("Testing Enabled")
+    app.config["TESTING"] = os.environ["TESTING"]
+    
+if app.config["TESTING"] == 'True':
+    print("Setting DB as Test")
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_test'
+else:
+    print("Setting DB As Prod")
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_db'
+
+print(app.config['SQLALCHEMY_DATABASE_URI'])
 debug= DebugToolbarExtension(app)
 
+    # DB Initialization code
 connect_db(app)
 #db.create_all()
 
